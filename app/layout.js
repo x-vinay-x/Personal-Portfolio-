@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import NextTopLoader from "nextjs-toploader";
 import SimpleAnalytics from "./(home)/components/SimpleAnalytics";
 import ViewStats from "./(home)/components/ViewStats";
+import OwnerMode from "./(home)/components/OwnerMode";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -43,6 +44,7 @@ export default function RootLayout({ children }) {
 
           <NextTopLoader />
           <SimpleAnalytics />
+          <OwnerMode />
           <Header />
 
           {children}
