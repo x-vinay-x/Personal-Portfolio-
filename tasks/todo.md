@@ -42,6 +42,12 @@
 - [x] Reduce complex box-shadows on mobile for better FPS
 - [x] Optimize `pointer-events` for BackgroundEffects
 
+## 12. Extreme Mobile Performance Refactor
+- [x] Refactor TechStack to use `Refs` for direct DOM position updates (bypass React rendering)
+- [x] Reduce tech icon count on mobile (cap to ~16-20 items)
+- [x] Disable physics simulation if the element is not in viewport (Observer)
+- [x] Remove all expensive CSS shadows on mobile entirely
+
 ## 6. Remediation Execution
 - [x] Fix Performance & Build Optimization (Header Logo sizing)
 - [x] Fix Minor Hardcoded Values (Footer Typos)

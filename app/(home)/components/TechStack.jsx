@@ -35,12 +35,21 @@ const flatTechs = [
 const TechStack = () => {
   const sceneRef = useRef(null);
   const engineRef = useRef(null);
-  const [domBodies, setDomBodies] = useState([]);
-  const [isSimulationReady, setIsSimulationReady] = useState(false);
+  const runnerRef = useRef(null);
+  const itemRefs = useRef([]);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [activeTechs, setActiveTechs] = useState([]);
+  const [isSimulationReady, setIsSimulationReady] = useState(false);
 
   useEffect(() => {
     if (!sceneRef.current) return;
+
+    const isMobile = window.innerWidth < 768;
+    setIsMobileView(isMobile);
+
+    // Filter techs on mobile to save GPU cycles (limit to 18)
+    const filteredTechs = isMobile ? flatTechs.slice(0, 18) : flatTechs;
+    setActiveTechs(filteredTechs);
 
     const Engine = Matter.Engine,
       Runner = Matter.Runner,
@@ -49,24 +58,14 @@ const TechStack = () => {
       Composite = Matter.Composite,
       Bodies = Matter.Bodies;
 
-    // create engine
     const engine = Engine.create();
     engineRef.current = engine;
-
-    // adjust gravity for a heavier, realistic feel
     engine.gravity.y = 0.8;
 
     const containerWidth = sceneRef.current.clientWidth;
     const containerHeight = sceneRef.current.clientHeight;
 
-    // Extremely thick boundaries to prevent tunneling at high speeds
-    const wallOptions = {
-      isStatic: true,
-      render: { visible: false },
-      friction: 0.5,
-      restitution: 0.2 // slightly bouncy walls
-    };
-
+    const wallOptions = { isStatic: true, render: { visible: false }, friction: 0.5, restitution: 0.2 };
     const wallThickness = 500;
 
     const ground = Bodies.rectangle(containerWidth / 2, containerHeight + (wallThickness / 2), containerWidth, wallThickness, wallOptions);
@@ -76,28 +75,20 @@ const TechStack = () => {
 
     Composite.add(engine.world, [ground, leftWall, rightWall, topWall]);
 
-    // Calculate dynamic base radius based on screen size
-    const isMobile = window.innerWidth < 768;
-    setIsMobileView(isMobile);
     const baseSize = isMobile ? 30 : 40;
 
-    // create tech stack entities with varied shapes and sizes
-    const physicsBodies = flatTechs.map((tech, i) => {
-      // stagger initial positions inside the box
+    const physicsBodies = filteredTechs.map((tech, i) => {
       const x = Math.random() * (containerWidth - baseSize * 2) + baseSize;
       const y = Math.random() * (containerHeight / 2) + baseSize;
-
-      const sizeMultiplier = Math.random() > 0.8 ? 1.3 : (Math.random() < 0.2 ? 0.8 : 1);
+      const sizeMultiplier = Math.random() > 0.8 ? 1.2 : (Math.random() < 0.2 ? 0.8 : 1);
       const currentSize = baseSize * sizeMultiplier;
-
-      // Determine if it should be a circle or rounded rectangle (1 in 4 chance for a square)
-      const isRect = Math.random() > 0.75;
+      const isRect = Math.random() > 0.8;
 
       const bodyOptions = {
-        restitution: 0.5, // bounciness
-        frictionAir: 0.015,
+        restitution: 0.4,
+        frictionAir: 0.02,
         friction: 0.1,
-        density: 0.005 * sizeMultiplier,
+        density: 0.005,
         render: { visible: false }
       };
 
@@ -105,97 +96,100 @@ const TechStack = () => {
         ? Bodies.rectangle(x, y, currentSize * 2, currentSize * 2, { ...bodyOptions, chamfer: { radius: currentSize * 0.4 } })
         : Bodies.circle(x, y, currentSize, bodyOptions);
 
-      // Attach React payload to body
-      body.plugin = { tech, originalSize: currentSize, isRect };
+      body.plugin = { originalSize: currentSize, isRect };
       return body;
     });
 
     Composite.add(engine.world, physicsBodies);
 
-    // Add a safety respawn loop for any bodies that tunnel out of bounds
     Matter.Events.on(engine, 'afterUpdate', () => {
       physicsBodies.forEach(body => {
-        if (body.position.y > containerHeight + 100 || body.position.x < -100 || body.position.x > containerWidth + 100) {
-          Matter.Body.setPosition(body, {
-            x: containerWidth / 2 + (Math.random() * 50 - 25),
-            y: containerHeight / 4
-          });
+        if (body.position.y > containerHeight + 100) {
+          Matter.Body.setPosition(body, { x: containerWidth / 2, y: 50 });
           Matter.Body.setVelocity(body, { x: 0, y: 0 });
         }
       });
     });
 
-    // add mouse control
     const mouse = Mouse.create(sceneRef.current);
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse: mouse,
-      constraint: {
-        stiffness: 0.2,
-        render: { visible: false }
-      }
+      constraint: { stiffness: 0.2, render: { visible: false } }
     });
 
-    // Make scrolling work on mobile by avoiding capturing scroll events unless explicitly interacting 
-    // We let the mouse module know the scroll element
     mouseConstraint.mouse.element.removeEventListener("mousewheel", mouseConstraint.mouse.mousewheel);
     mouseConstraint.mouse.element.removeEventListener("DOMMouseScroll", mouseConstraint.mouse.mousewheel);
 
     Composite.add(engine.world, mouseConstraint);
 
-    // Run the engine
     const runner = Runner.create();
-    Runner.run(runner, engine);
+    runnerRef.current = runner;
+
+    // Performance Guard: Only run if in view
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        Runner.run(runner, engine);
+      } else {
+        Runner.stop(runner);
+      }
+    }, { threshold: 0.1 });
+
+    observer.observe(sceneRef.current);
+
     setIsSimulationReady(true);
 
-    // React Animation Loop
+    // HIGH PERFORMANCE ANIMATION LOOP
     let animationFrameId;
-    const updateDOM = () => {
-      setDomBodies(physicsBodies.map(body => ({
-        id: body.id,
-        x: body.position.x,
-        y: body.position.y,
-        angle: body.angle,
-        tech: body.plugin.tech,
-        size: body.plugin.originalSize,
-        isRect: body.plugin.isRect
-      })));
-      animationFrameId = requestAnimationFrame(updateDOM);
+    const updateLoop = () => {
+      physicsBodies.forEach((body, idx) => {
+        const element = itemRefs.current[idx];
+        if (element) {
+          const size = body.plugin.originalSize;
+          element.style.transform = `translate3d(${body.position.x - size}px, ${body.position.y - size}px, 0) rotate(${body.angle}rad)`;
+        }
+      });
+      animationFrameId = requestAnimationFrame(updateLoop);
     };
-    updateDOM();
+    updateLoop();
 
-    // Handle Resize (Update walls)
     const handleResize = () => {
       if (!sceneRef.current) return;
       const newWidth = sceneRef.current.clientWidth;
       const newHeight = sceneRef.current.clientHeight;
-
       Matter.Body.setPosition(ground, { x: newWidth / 2, y: newHeight + (wallThickness / 2) });
       Matter.Body.setPosition(rightWall, { x: newWidth + (wallThickness / 2), y: newHeight / 2 });
       Matter.Body.setPosition(leftWall, { x: 0 - (wallThickness / 2), y: newHeight / 2 });
       Matter.Body.setPosition(topWall, { x: newWidth / 2, y: 0 - (wallThickness / 2) });
     };
+
     window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       Runner.stop(runner);
       Engine.clear(engine);
+      observer.disconnect();
       window.removeEventListener('resize', handleResize);
     };
   }, []);
 
   const getGlowColor = (category, isMobile) => {
-    // Reduce shadow calculations on mobile Android for better FPS
-    const shadowIntensity = isMobile ? '5px' : '15px';
-    const bgOpacity = isMobile ? '50' : '10'; // Darker background if blur is removed
+    if (isMobile) {
+      switch (category) {
+        case 'languages': return 'border-blue-500/40 bg-blue-900/40';
+        case 'embedded': return 'border-emerald-500/40 bg-emerald-900/40';
+        case 'ai': return 'border-purple-500/40 bg-purple-900/40';
+        default: return 'border-zinc-500/40 bg-zinc-900/40';
+      }
+    }
 
     switch (category) {
-      case 'languages': return `shadow-[0_0_${shadowIntensity}_rgba(59,130,246,0.5)] border-blue-500/60 bg-blue-500/${bgOpacity}`;
-      case 'embedded': return `shadow-[0_0_${shadowIntensity}_rgba(16,185,129,0.5)] border-emerald-500/60 bg-emerald-500/${bgOpacity}`;
-      case 'ai': return `shadow-[0_0_${shadowIntensity}_rgba(168,85,247,0.5)] border-purple-500/60 bg-purple-500/${bgOpacity}`;
-      case 'llm': return `shadow-[0_0_${shadowIntensity}_rgba(249,115,22,0.5)] border-orange-500/60 bg-orange-500/${bgOpacity}`;
-      case 'tools': return `shadow-[0_0_${shadowIntensity}_rgba(99,102,241,0.5)] border-indigo-500/60 bg-indigo-500/${bgOpacity}`;
-      default: return `shadow-[0_0_${shadowIntensity}_rgba(113,113,122,0.5)] border-zinc-500/60 bg-zinc-500/${bgOpacity}`;
+      case 'languages': return 'shadow-[0_0_15px_rgba(59,130,246,0.3)] border-blue-500/60 bg-blue-500/10';
+      case 'embedded': return 'shadow-[0_0_15px_rgba(16,185,129,0.3)] border-emerald-500/60 bg-emerald-500/10';
+      case 'ai': return 'shadow-[0_0_15px_rgba(168,85,247,0.3)] border-purple-500/60 bg-purple-500/10';
+      case 'llm': return 'shadow-[0_0_15px_rgba(249,115,22,0.3)] border-orange-500/60 bg-orange-500/10';
+      case 'tools': return 'shadow-[0_0_15px_rgba(99,102,241,0.3)] border-indigo-500/60 bg-indigo-500/10';
+      default: return 'shadow-[0_0_15px_rgba(113,113,122,0.3)] border-zinc-500/60 bg-zinc-500/10';
     }
   };
 
@@ -229,31 +223,36 @@ const TechStack = () => {
             style={{ touchAction: 'none' }}
           >
             {/* Physics Engine positions these absolute elements */}
-            {isSimulationReady && domBodies.map((body) => (
-              <div
-                key={body.id}
-                title={body.tech.name}
-                className={`absolute top-0 left-0 border-2 flex items-center justify-center select-none ${isMobileView ? 'backdrop-blur-none' : 'backdrop-blur-md'} ${getGlowColor(body.tech.category, isMobileView)} ${body.isRect ? 'rounded-2xl' : 'rounded-full'} hover:scale-110 active:scale-95 transition-transform duration-75`}
-                style={{
-                  width: body.size * 2,
-                  height: body.size * 2,
-                  transform: `translate(${body.x - body.size}px, ${body.y - body.size}px) rotate(${body.angle}rad)`,
-                  willChange: 'transform'
-                }}
-              >
-                <img
-                  src={body.tech.icon}
-                  alt={body.tech.name}
-                  draggable={false}
-                  className="w-[55%] h-[55%] brightness-0 invert pointer-events-none select-none opacity-90"
-                  loading="lazy"
-                />
-              </div>
-            ))}
+            {/* Render icons once; positions updated via direct DOM access */}
+            {isSimulationReady && activeTechs.map((tech, idx) => {
+              const isRect = ((idx * 0.1337) % 1) > 0.8;
+              const sizeMult = ((idx * 0.4242) % 1) > 0.8 ? 1.2 : (((idx * 0.4242) % 1) < 0.2 ? 0.8 : 1);
+              const baseS = isMobileView ? 30 : 40;
+              const size = baseS * sizeMult;
 
-            {/* Glass Jar Overlays */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-zinc-900/50 to-transparent pointer-events-none rounded-b-[32px] md:rounded-b-[48px]" />
-            <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+              return (
+                <div
+                  key={idx}
+                  ref={el => itemRefs.current[idx] = el}
+                  className={`absolute top-0 left-0 border flex items-center justify-center select-none ${isMobileView ? 'backdrop-blur-none' : 'backdrop-blur-md'} ${getGlowColor(tech.category, isMobileView)} ${isRect ? 'rounded-xl' : 'rounded-full'} will-change-transform shadow-sm`}
+                  style={{
+                    width: size * 2,
+                    height: size * 2,
+                    position: 'absolute',
+                  }}
+                >
+                  <img
+                    src={tech.icon}
+                    alt={tech.name}
+                    draggable={false}
+                    className="w-[50%] h-[50%] brightness-0 invert pointer-events-none select-none opacity-80"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+
+            <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-zinc-900/30 to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
