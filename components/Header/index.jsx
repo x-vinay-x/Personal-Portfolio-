@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { HiDownload } from 'react-icons/hi';
 
 const NAV_ITEMS = config.NAV_ITEMS;
 
@@ -57,14 +58,16 @@ const Logo = ({ isMobile = false }) => (
             className="flex items-center space-x-2 hover:opacity-90 transition-opacity"
         >
             <motion.div
-                whileHover={{ opacity:0.5 }}
+                whileHover={{ opacity: 0.5 }}
                 whileTap={{ scale: 0.95 }}
             >
                 <Image
                     src="/logo.png"
-                    width={2000}
-                    height={2000}
+                    width={80}
+                    height={80}
                     alt='logo'
+                    quality={100}
+                    priority
                     className={`${isMobile ? 'w-14 h-14' : 'w-16 h-16 sm:w-20 sm:h-20'} rounded-full`}
                 />
             </motion.div>
@@ -103,18 +106,24 @@ const Navigation = ({ isMobile = false, onLinkClick }) => (
 
 const ContactButton = ({ isMobile = false, onLinkClick }) => (
     <motion.div
-        className={`flex items-center ${isMobile ? 'w-full justify-center mt-4' : 'space-x-6'}`}
+        className={`flex items-center ${isMobile ? 'w-full flex-col space-y-3 mt-4' : 'space-x-4'}`}
         initial={{ opacity: 0, x: isMobile ? 0 : 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: isMobile ? 0.5 : 0.4, duration: 0.5 }}
         onClick={onLinkClick}
     >
         <Link href={`https://github.com/${config.social.github}`} target='_blank' className={isMobile ? 'w-full' : ''}>
-            <Button className={`${isMobile ? 'w-full' : ''} rounded-2xl font-semibold bg-white text-gray-900 hover:bg-gray-200 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3`}>
-                <span className="hidden sm:inline">GitHub Profile</span>
+            <Button className={`${isMobile ? 'w-full' : ''} rounded-2xl font-semibold bg-white/10 text-white hover:bg-white/20 border border-white/20 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 transition-all`}>
+                <span className="hidden sm:inline">GitHub</span>
                 <span className="sm:hidden">GitHub</span>
             </Button>
         </Link>
+        <a href="/Embedded_and_AI_ML_engineer.pdf" target="_blank" rel="noopener noreferrer" className={isMobile ? 'w-full' : ''}>
+            <Button className={`${isMobile ? 'w-full' : ''} rounded-2xl font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 transition-all flex items-center gap-2`}>
+                <HiDownload className="w-4 h-4" />
+                <span>Resume</span>
+            </Button>
+        </a>
     </motion.div>
 );
 
@@ -143,7 +152,7 @@ const Header = () => {
                     <div className="hidden md:block">
                         <ContactButton />
                     </div>
-                    
+
                     {/* Mobile Menu Button */}
                     <button
                         onClick={toggleMobileMenu}
@@ -172,7 +181,7 @@ const Header = () => {
                             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
                             onClick={closeMobileMenu}
                         />
-                        
+
                         {/* Mobile Menu Panel */}
                         <motion.div
                             initial={{ x: '100%' }}

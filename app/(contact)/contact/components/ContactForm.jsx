@@ -15,7 +15,7 @@ const ContactForm = ({ onSubmit }) => {
   } = useForm();
 
   const formRef = useRef();
-//   console.log(`env : ${process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID}`)
+  //   console.log(`env : ${process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID}`)
 
   const onSubmitHandler = async (data) => {
     await onSubmit(data);
@@ -30,7 +30,7 @@ const ContactForm = ({ onSubmit }) => {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmitHandler)} noValidate className="space-y-6">
       <div className="space-y-4">
         {/* Name and Email in a 2-column grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -43,7 +43,7 @@ const ContactForm = ({ onSubmit }) => {
               id="name"
               type="text"
               name="name"
-              placeholder="Vinay N"
+              placeholder="John Doe"
               className="rounded-lg border-primary/20 w-full"
             />
             {errors.name && (
@@ -68,7 +68,7 @@ const ContactForm = ({ onSubmit }) => {
               id="email"
               type="email"
               name="email"
-              placeholder="vinevinayn@gmail.com"
+              placeholder="johndoe@example.com"
               className="rounded-lg border-primary/20 w-full"
             />
             {errors.email && (

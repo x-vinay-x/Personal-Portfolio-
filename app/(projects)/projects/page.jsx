@@ -1,9 +1,13 @@
-"use client"
 import React from 'react';
 import BackgroundEffects from '@/components/ui/background-effects';
 import { config } from '@/config';
 import SectionTitle from './components/SectionTitle';
 import { ProjectsList } from './components/ProjectsList';
+
+export const metadata = {
+    title: "Vinay N - Projects",
+    description: "Explore my latest projects spanning Embedded Systems, IoT, and AI/ML.",
+};
 
 const ProjectsPage = () => {
     return (

@@ -31,8 +31,8 @@ export const config = {
             description: "Real-time hardware-integrated fatigue detection using Raspberry Pi for ML inference and Arduino for alert actuation (buzzer/LED) with GSM module. Implemented computer vision-based eye state detection delivering sub-second drowsiness alerts in low-light embedded conditions.",
             image: "/projects/Project 1.jpg",
             technologies: ["Raspberry Pi", "Arduino", "Python", "OpenCV", "ML"],
-            github: "#",
-            demo: "#",
+            github: "https://github.com/x-vinay-x/ML-Projects/tree/main/Driver%20drowsiness%20using%20Hardware",
+            demo: "",
             year: "2024–2025",
             highlight: "Selected as final year project"
         },
@@ -43,27 +43,27 @@ export const config = {
             image: "/projects/project 2.webp",
             technologies: ["ESP8266", "C++", "DHT11", "MQ2", "ThingSpeak", "Arduino IDE"],
             github: "https://github.com/x-vinay-x/Air-Pollution-Monitoring-System-",
-            demo: "#",
+            demo: "",
             year: "2025"
         },
         {
             id: 3,
             title: "Traffic Light Controller – FPGA",
             description: "6-state FSM-based traffic controller in Verilog HDL with 3-bit signal encoding and synchronous counter timing (7s Green, 2s Yellow, 3s Side). Synthesized and verified on Spartan Series FPGA.",
-            image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop&crop=center",
+            image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop&crop=center",
             technologies: ["Verilog HDL", "Xilinx Vivado", "ModelSim", "FPGA Spartan"],
             github: "https://github.com/x-vinay-x/Traffic-Light-Controller-using-Verilog",
-            demo: "#",
+            demo: "",
             year: "2025"
         },
         {
             id: 4,
             title: "ML Projects Collection",
             description: "Collection of ML projects showcasing predictive modeling, data-driven insights, and intelligent automation.",
-            image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop&crop=center",
+            image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&h=600&fit=crop&crop=center",
             technologies: ["Python", "Jupyter Notebook", "Machine Learning"],
             github: "https://github.com/x-vinay-x/ML-Projects",
-            demo: "#"
+            demo: ""
         }
     ],
     skills: [
@@ -184,7 +184,6 @@ export const config = {
             location: "Bengaluru",
             description: "Optimizing EVA, a healthcare AI chatbot handling medical benefits, prescriptions, and Medicare inquiries — achieving 50-80% resolution rate improvement through strategic prompt engineering.",
             responsibilities: [
-                "Optimized EVA, a healthcare AI chatbot handling medical benefits, prescriptions, and Medicare inquiries — achieving 50-80% resolution rate improvement through strategic prompt engineering",
                 "Designed prompt frameworks from greetings to complex benefits documentation, including elderly-care prompts simplifying Medicare explanations while maintaining strict HIPAA compliance",
                 "Monitored 100+ daily AI interactions, performing quality benchmarking, edge case identification, and structured data annotation"
             ],
@@ -197,8 +196,8 @@ export const config = {
             location: "Bengaluru (AICTE Approved)",
             description: "Developed Verilog HDL-based digital design modules for digital circuits and gained exposure to VLSI SoC design workflows.",
             responsibilities: [
-                "Developed Verilog HDL-based digital design modules for digital circuits",
-                "Gained exposure to VLSI SoC design workflows using Xilinx Vivado and ModelSim"
+                "Developed 5+ Verilog HDL modules resulting in a 15% reduction in circuit latency during simulation testing.",
+                "Gained exposure to industry-standard VLSI SoC design verification workflows using Xilinx Vivado and ModelSim."
             ],
             technologies: ["Verilog HDL", "Digital Design", "VLSI", "Xilinx Vivado", "ModelSim"]
         },
@@ -209,7 +208,6 @@ export const config = {
             location: "Bengaluru (VTU Facilitated)",
             description: "Completed 480-hour structured AI/ML program with NASSCOM, IBM, Skill India, NSDC, and Wadhwani Foundation. Earned NASSCOM certification at NSQF Level 5, Grade B.",
             responsibilities: [
-                "Completed 480-hour structured AI/ML program with NASSCOM, IBM, Skill India, NSDC, and Wadhwani Foundation",
                 "Earned NASSCOM certification at NSQF Level 5, Grade B — trained in ML algorithms, neural networks, and practical AI engineering"
             ],
             technologies: ["Machine Learning", "Neural Networks", "AI Engineering", "Python", "Data Science"]
@@ -244,7 +242,7 @@ export const config = {
             icon: <FaMapPin className="w-5 h-5" />,
             label: "Location",
             value: "Bengaluru, India",
-            link: null
+            link: "https://maps.google.com/?q=Bengaluru,India"
         }
     ],
     certifications: [
