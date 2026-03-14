@@ -40,6 +40,15 @@ const BackgroundEffects = ({
     intensity = '10',
     blurAmount = '3xl',
 }) => {
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMobile(window.innerWidth < 768);
+    }, []);
+
+    // Reduce blur heavily on mobile to save GPU compositing
+    const mobileOptimizedBlur = isMobile ? 'xl' : blurAmount;
+
     const positions = {
         default: {
             first: 'top-1/4 -translate-y-1/2 left-1/4',
@@ -72,21 +81,23 @@ const BackgroundEffects = ({
             <motion.div
                 variants={blobVariants}
                 className={cn(
-                    'absolute w-96 h-96 rounded-full',
-                    `bg-${colors.first}/${intensity}`,
-                    `blur-${blurAmount}`,
+                    'absolute w-96 h-96 rounded-full will-change-transform',
+                    `bg-${colors.first}/${Math.max(5, parseInt(intensity) - (isMobile ? 5 : 0))}`,
+                    `blur-${mobileOptimizedBlur}`,
                     positions[variant].first
                 )}
+                style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
                 key={`blob-1-${colors.first}-${variant}`}
             />
             <motion.div
                 variants={blobVariants}
                 className={cn(
-                    'absolute w-96 h-96 rounded-full',
-                    `bg-${colors.second}/${intensity}`,
-                    `blur-${blurAmount}`,
+                    'absolute w-96 h-96 rounded-full will-change-transform',
+                    `bg-${colors.second}/${Math.max(5, parseInt(intensity) - (isMobile ? 5 : 0))}`,
+                    `blur-${mobileOptimizedBlur}`,
                     positions[variant].second
                 )}
+                style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
                 key={`blob-2-${colors.second}-${variant}`}
             />
         </motion.div>

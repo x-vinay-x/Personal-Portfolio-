@@ -37,6 +37,11 @@
 - [x] Update Experience data with actionable metrics
 - [x] Add functional Google Maps link to Location Contact item
 
+## 11. Mobile Performance Optimization
+- [x] Disable `backdrop-blur` on mobile TechStack physics bodies
+- [x] Reduce complex box-shadows on mobile for better FPS
+- [x] Optimize `pointer-events` for BackgroundEffects
+
 ## 6. Remediation Execution
 - [x] Fix Performance & Build Optimization (Header Logo sizing)
 - [x] Fix Minor Hardcoded Values (Footer Typos)

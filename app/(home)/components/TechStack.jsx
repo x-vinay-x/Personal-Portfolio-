@@ -37,6 +37,7 @@ const TechStack = () => {
   const engineRef = useRef(null);
   const [domBodies, setDomBodies] = useState([]);
   const [isSimulationReady, setIsSimulationReady] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -77,6 +78,7 @@ const TechStack = () => {
 
     // Calculate dynamic base radius based on screen size
     const isMobile = window.innerWidth < 768;
+    setIsMobileView(isMobile);
     const baseSize = isMobile ? 30 : 40;
 
     // create tech stack entities with varied shapes and sizes
@@ -182,14 +184,18 @@ const TechStack = () => {
     };
   }, []);
 
-  const getGlowColor = (category) => {
+  const getGlowColor = (category, isMobile) => {
+    // Reduce shadow calculations on mobile Android for better FPS
+    const shadowIntensity = isMobile ? '5px' : '15px';
+    const bgOpacity = isMobile ? '50' : '10'; // Darker background if blur is removed
+
     switch (category) {
-      case 'languages': return 'shadow-[0_0_15px_rgba(59,130,246,0.5)] border-blue-500/60 bg-blue-500/10';
-      case 'embedded': return 'shadow-[0_0_15px_rgba(16,185,129,0.5)] border-emerald-500/60 bg-emerald-500/10';
-      case 'ai': return 'shadow-[0_0_15px_rgba(168,85,247,0.5)] border-purple-500/60 bg-purple-500/10';
-      case 'llm': return 'shadow-[0_0_15px_rgba(249,115,22,0.5)] border-orange-500/60 bg-orange-500/10';
-      case 'tools': return 'shadow-[0_0_15px_rgba(99,102,241,0.5)] border-indigo-500/60 bg-indigo-500/10';
-      default: return 'shadow-[0_0_15px_rgba(113,113,122,0.5)] border-zinc-500/60 bg-zinc-500/10';
+      case 'languages': return `shadow-[0_0_${shadowIntensity}_rgba(59,130,246,0.5)] border-blue-500/60 bg-blue-500/${bgOpacity}`;
+      case 'embedded': return `shadow-[0_0_${shadowIntensity}_rgba(16,185,129,0.5)] border-emerald-500/60 bg-emerald-500/${bgOpacity}`;
+      case 'ai': return `shadow-[0_0_${shadowIntensity}_rgba(168,85,247,0.5)] border-purple-500/60 bg-purple-500/${bgOpacity}`;
+      case 'llm': return `shadow-[0_0_${shadowIntensity}_rgba(249,115,22,0.5)] border-orange-500/60 bg-orange-500/${bgOpacity}`;
+      case 'tools': return `shadow-[0_0_${shadowIntensity}_rgba(99,102,241,0.5)] border-indigo-500/60 bg-indigo-500/${bgOpacity}`;
+      default: return `shadow-[0_0_${shadowIntensity}_rgba(113,113,122,0.5)] border-zinc-500/60 bg-zinc-500/${bgOpacity}`;
     }
   };
 
@@ -227,7 +233,7 @@ const TechStack = () => {
               <div
                 key={body.id}
                 title={body.tech.name}
-                className={`absolute top-0 left-0 border-2 flex items-center justify-center select-none backdrop-blur-md ${getGlowColor(body.tech.category)} ${body.isRect ? 'rounded-2xl' : 'rounded-full'} hover:scale-110 active:scale-95 transition-transform duration-75`}
+                className={`absolute top-0 left-0 border-2 flex items-center justify-center select-none ${isMobileView ? 'backdrop-blur-none' : 'backdrop-blur-md'} ${getGlowColor(body.tech.category, isMobileView)} ${body.isRect ? 'rounded-2xl' : 'rounded-full'} hover:scale-110 active:scale-95 transition-transform duration-75`}
                 style={{
                   width: body.size * 2,
                   height: body.size * 2,
