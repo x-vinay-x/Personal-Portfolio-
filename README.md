@@ -61,4 +61,4 @@ Embedded Systems Engineer specializing in Verilog HDL, Embedded C, and hardware-
 - **Email**: vinevinayn@gmail.com
 - **LinkedIn**: [linkedin.com/in/vinay-nece](https://linkedin.com/in/vinay-nece)
 - **GitHub**: [github.com/x-vinay-x](https://github.com/x-vinay-x)
-- **Portfolio**: [https://portfolio-vinayn.netlify.app/](https://portfolio-vinayn.netlify.app/)
+- **Portfolio**: [vinayn-portfolio.netlify.app](https://vinayn-portfolio.netlify.app/)
